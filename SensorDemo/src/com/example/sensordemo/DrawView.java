@@ -1,5 +1,6 @@
 package com.example.sensordemo;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -92,6 +93,7 @@ public class DrawView extends View {
 		this.zO = z;
 	}
 
+	@SuppressLint("DrawAllocation")
 	@Override
 	public void onDraw(Canvas canvas) {
 
