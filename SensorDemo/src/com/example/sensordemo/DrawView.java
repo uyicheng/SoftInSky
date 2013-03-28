@@ -12,130 +12,171 @@ import android.graphics.PathEffect;
 import android.graphics.Paint.Style;
 import android.view.View;
 
-
 public class DrawView extends View {
 
+	// 座標ラインペイント
 	Paint paint = new Paint();
 
+	// 文字ペイント
 	Paint paintText = new Paint();
 
+	// 加速度位置ペイント
 	Paint paintALine = new Paint();
 
+	// 方向位置ペイント
 	Paint paintOLine = new Paint();
 
+	// 加速度位置の３つ座標
 	private int xA = 0;
 	private int yA = 0;
 	private int zA = 0;
 
+	// 方向位置の３つ座標
 	private int xO = 0;
 	private int yO = 0;
 	private int zO = 0;
 
+	// 端末横サイズ
 	private int screenWidth = 0;
+	// 端末縦サイズ
 	private int screenHeight = 0;
 
+	// 端末の中央座標
 	private int centerX = 0;
 	private int centerY = 0;
 
+	// XY座標の最少単位
 	private int picecX = 0;
 	private int picecY = 0;
-	
+
+	// 方向円の半径
 	int r = 0;
 
 	public DrawView(Context context, int screenWidth, int screenHeight) {
 
 		super(context);
 
+		// 座標ペイント設定
 		paint.setColor(Color.RED);
-		paint.setAntiAlias(true);
-		PathEffect effects = new DashPathEffect(new float[] { 1, 2, 4, 8 }, 1);
+		paint.setAntiAlias(true);// ラインのアンチエイリアシングを切り替える
+		PathEffect effects = new DashPathEffect(new float[] { 1, 2, 4, 8 }, 1);// 点ライン
 		paint.setPathEffect(effects);
 
+		// 文字ペイント設定
 		paintText.setColor(Color.BLACK);
 		paintText.setTextSize(22);
 
+		// 加速度ペイント設定
 		paintALine.setColor(Color.BLUE);
 		paintALine.setAntiAlias(true);
 		paintALine.setStyle(Style.STROKE);
 
+		// 方向ペイント設定
 		paintOLine.setColor(Color.GREEN);
 		paintOLine.setAntiAlias(true);
 		paintOLine.setStyle(Style.STROKE);
 
+		// 端末の横、縦設定
 		this.screenWidth = screenWidth;
 		this.screenHeight = screenHeight;
 
+		// 端末中央座標設定
 		centerX = screenWidth / 2;
 		centerY = screenHeight / 2;
 
+		// 座標の単位
 		picecX = centerX / 10;
 		picecY = centerY / 10;
 
+		// 加速度X,Y座標初期値
 		xA = centerX;
 		yA = centerY;
 
+		// 方向位置X,Y座標初期値
 		xO = centerX;
 		yO = centerY;
-		
+
+		// 方向円の半径
 		r = screenWidth / 3;
 
 	}
 
+	/**
+	 * 加速度座標の設定
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
 	public void setAPosition(int x, int y, int z) {
 		this.xA = x;
 		this.yA = y;
 		this.zA = z;
 	}
 
+	/**
+	 * 方向座標の設定
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 */
 	public void setOPosition(int x, int y, int z) {
 		this.xO = x;
 		this.yO = y;
 		this.zO = z;
 	}
 
+	/**
+	 * 描画
+	 */
 	@SuppressLint("DrawAllocation")
 	@Override
 	public void onDraw(Canvas canvas) {
 
+		// 座標の描画
 		canvas.drawLine(screenWidth / 2, 0, screenWidth / 2, screenHeight, paint);
 		canvas.drawLine(0, screenHeight / 2, screenWidth, screenHeight / 2, paint);
 
-		//加速センサーライン
-		//canvas.drawLine(centerX, centerY, (centerX - xA * picecX), (centerY - yA * picecY), paintALine);
-		
+		// 方向矢印のロード
 		Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.gps);
-		//canvas.drawBitmap(bitmap, (centerX - bitmap.getWidth()/2), (centerY - bitmap.getHeight()/2),null);
-		canvas.drawBitmap(bitmap, (centerX - xA * picecX - bitmap.getWidth()/2), (centerY + yA * picecY - bitmap.getHeight()/2),null);
+		canvas.drawBitmap(bitmap, (centerX - xA * picecX - bitmap.getWidth() / 2), (centerY + yA * picecY - bitmap.getHeight() / 2), null);
 
 		double x = 0;
 		double alpha = 0;
-		
 
+		// 方向円の描画
 		for (int i = 0; i < 359; i++) {
 
+			// 円上前の角座標
 			alpha = Math.toRadians(i);
 			x = Math.sin(alpha);
 			double a1 = (-1) * x * r;
 			x = Math.cos(alpha);
 			double b1 = x * r;
 
+			// 円上次の角座標
 			alpha = Math.toRadians(i + 1);
 			x = Math.sin(alpha);
 			double a2 = (-1) * x * r;
 			x = Math.cos(alpha);
 			double b2 = x * r;
 
+			// 円上前の角から次の角へラインを描画
 			canvas.drawLine((centerX - (int) a1), (centerY - (int) b1), (centerX - (int) a2), (centerY - (int) b2), paintOLine);
 		}
 
+		// 方向センサ有効の場合
 		if (xO != centerX) {
 
-			//xyStaticShow(canvas);
+			// xyStaticShow(canvas);
+			// 方向の描画
 			directionStaticShow(canvas);
 		}
 	}
 
 	/**
+	 * 円固定、矢印移動の処理
 	 * 
 	 * @param canvas
 	 */
@@ -144,7 +185,7 @@ public class DrawView extends View {
 		double x = 0;
 		double r = 0;
 		double alpha = 0;
-		
+
 		canvas.drawText("北", screenWidth / 2, 20, paintText);
 		canvas.drawText("東", screenWidth - 20, screenHeight / 2, paintText);
 		canvas.drawText("西", 0, screenHeight / 2, paintText);
@@ -174,6 +215,11 @@ public class DrawView extends View {
 
 	}
 
+	/**
+	 * 矢印固定、円移動の処理
+	 * 
+	 * @param canvas
+	 */
 	private void directionStaticShow(Canvas canvas) {
 
 		double x = 0;
