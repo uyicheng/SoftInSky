@@ -1,5 +1,4 @@
 
-
 public class MainApp {
 
 	/**
@@ -9,6 +8,7 @@ public class MainApp {
 		
 		double alpha = Math.toRadians(270);
 		int c = 5;
+		int d = 0;
 		
 		double x = Math.sin(alpha);
 		double a = x*c;
